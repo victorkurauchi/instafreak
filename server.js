@@ -10,12 +10,12 @@ var io = require('socket.io')(http);
 app.set('view engine', 'ejs');
 
 instagram.use({
-  client_id: "507df1304aa140dfb90133fd40057f3b",
-  client_secret: "1a1edd7e91814c22be0bdc888e8b5141"
+  client_id: "YOUR_CLIENT_ID",
+  client_secret: "YOUR_CLIENT_SECRET"
 });
 
 var redirect_uri = 'http://127.0.0.1:4000/handleauth';
-var access_token = '196583629.507df13.a94369cccf074f6a8d0386caf39538b6';
+var access_token = 'ACCESS_TOKEN';
 var MAIN_TAG = 'haikaiss';
 var LAST_TAG_ID = '';
 
@@ -82,11 +82,18 @@ exports.mediaFromUser = function(req, res) {
 	});
 };
 
-var checkForNewMedias = function(min_tag_id) {
+exports.findHashtag = function(req, res) {
+	var hashtag = req.params.hashtag || MAIN_TAG;
+	getMedias(hashtag);
+};
+
+// private methods
+
+var checkForNewMedias = function(min_tag_id, tag) {
 	console.log('checkin for new medias...', min_tag_id);
 	var self = this;
 
-	instagram.tag_media_recent(MAIN_TAG, {count:20, min_id:min_tag_id}, function(err, medias, remaining, limit) {
+	instagram.tag_media_recent(tag, {count:20, min_id:min_tag_id}, function(err, medias, remaining, limit) {
   	if (err) {
   		io.emit('loadingError', {msg: err});
   	} else {
@@ -109,7 +116,7 @@ var getMedias = function(tag) {
   		var last = medias[medias.length - 1];
 
   		io.emit('availableMedias', {medias: medias});
-  		checkForNewMedias(last.id);
+  		checkForNewMedias(last.id, tag);
   	}
   });
 }
@@ -126,9 +133,12 @@ app.get('/search/:user', exports.search);
 // get medias from user
 app.get('/media/user/:id', exports.mediaFromUser);
 
+// search for hashtag
+app.get('/hashtag/:hashtag', exports.findHashtag);
+
 // socket io on user connected
 io.on('connection', function(socket){
-  getMedias();
+  console.log('user has connected');
 
 	// after connected, the client sends a request do get more medias
 	socket.on('checkForNewMedias', function(socket) {
