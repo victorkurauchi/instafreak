@@ -10,8 +10,8 @@ var io = require('socket.io')(http);
 app.set('view engine', 'ejs');
 
 instagram.use({
-  client_id: "YOUR_CLIENT_ID",
-  client_secret: "YOUR_CLIENT_SECRET"
+  client_id: "YOUR_CLIENT",
+  client_secret: "YOUR_SECRET"
 });
 
 var redirect_uri = 'http://127.0.0.1:4000/handleauth';
@@ -40,7 +40,7 @@ exports.authorize_user = function(req, res) {
 exports.handleauth = function(req, res) {
   instagram.authorize_user(req.query.code, redirect_uri, function(err, result) {
     if (err) {
-    	console.log(err);
+      console.log(err);
       console.log(err.body);
       res.send("Didn't work");
     } else {
@@ -51,73 +51,73 @@ exports.handleauth = function(req, res) {
 };
 
 exports.search = function(req, res) {
-	var username = req.params.user || '';
+  var username = req.params.user || '';
 
-	instagram.use({ access_token: access_token});
-	instagram.user_search(username, function(err, users, remaining, limit) {
-		if (err) {
-			throw err;
-		}
-		users.forEach(function(u) {
-			if (users[users.length - 1] === u ) {
-				res.render('pages/profiles', {users: users});
-			}
-		});
-	});
+  instagram.use({ access_token: access_token});
+  instagram.user_search(username, function(err, users, remaining, limit) {
+    if (err) {
+      throw err;
+    }
+    users.forEach(function(u) {
+      if (users[users.length - 1] === u ) {
+        res.render('pages/profiles', {users: users});
+      }
+    });
+  });
 };
 
 exports.mediaFromUser = function(req, res) {
-	var id = req.params.id || '';
+  var id = req.params.id || '';
 
-	instagram.use({ access_token: access_token});
-	instagram.user_media_recent(id, function(err, medias, remaining, limit) {
-		if (err) {
-			throw err;
-		}
-		medias.forEach(function(u) {
-			if (medias[medias.length - 1] === u ) {
-				res.render('pages/medias', {medias: medias});
-			}
-		});
-	});
+  instagram.use({ access_token: access_token});
+  instagram.user_media_recent(id, function(err, medias, remaining, limit) {
+    if (err) {
+      throw err;
+    }
+    medias.forEach(function(u) {
+      if (medias[medias.length - 1] === u ) {
+        res.render('pages/medias', {medias: medias});
+      }
+    });
+  });
 };
 
 exports.findHashtag = function(req, res) {
-	var hashtag = req.params.hashtag || MAIN_TAG;
-	getMedias(hashtag);
+  var hashtag = req.params.hashtag || MAIN_TAG;
+  getMedias(hashtag);
 };
 
 // private methods
 
 var checkForNewMedias = function(min_tag_id, tag) {
-	console.log('checkin for new medias...', min_tag_id);
-	var self = this;
+  console.log('checkin for new medias...', min_tag_id);
+  var self = this;
 
-	instagram.tag_media_recent(tag, {count:20, min_id:min_tag_id}, function(err, medias, remaining, limit) {
-  	if (err) {
-  		io.emit('loadingError', {msg: err});
-  	} else {
-  		var last = medias[medias.length - 1];
-  		if (last.id !== min_tag_id) {
-  			io.emit('newMedias', {medias: medias, last_tag: last.id});
-  		} else {
-  			checkForNewMedias(last.id);
-  		}
-  	}
+  instagram.tag_media_recent(tag, {count:20, min_id:min_tag_id}, function(err, medias, remaining, limit) {
+    if (err) {
+      io.emit('loadingError', {msg: err});
+    } else {
+      var last = medias[medias.length - 1];
+      if (last.id !== min_tag_id) {
+        io.emit('newMedias', {medias: medias, last_tag: last.id});
+      } else {
+        checkForNewMedias(last.id);
+      }
+    }
   });
 };
 
 var getMedias = function(tag) {
-	var _tag = tag || MAIN_TAG;
-	instagram.tag_media_recent(_tag, {count: 20}, function(err, medias, remaining, limit) {
-  	if (err) {
-  		io.emit('loadingError', {msg: err});
-  	} else {
-  		var last = medias[medias.length - 1];
+  var _tag = tag || MAIN_TAG;
+  instagram.tag_media_recent(_tag, {count: 20}, function(err, medias, remaining, limit) {
+    if (err) {
+      io.emit('loadingError', {msg: err});
+    } else {
+      var last = medias[medias.length - 1];
 
-  		io.emit('availableMedias', {medias: medias});
-  		checkForNewMedias(last.id, tag);
-  	}
+      io.emit('availableMedias', {medias: medias});
+      checkForNewMedias(last.id, tag);
+    }
   });
 }
 
@@ -140,10 +140,10 @@ app.get('/hashtag/:hashtag', exports.findHashtag);
 io.on('connection', function(socket){
   console.log('user has connected');
 
-	// after connected, the client sends a request do get more medias
-	socket.on('checkForNewMedias', function(socket) {
-		checkForNewMedias(socket.last_tag);
-	});
+  // after connected, the client sends a request do get more medias
+  socket.on('checkForNewMedias', function(socket) {
+    checkForNewMedias(socket.last_tag);
+  });
 });
 
 // creating server
