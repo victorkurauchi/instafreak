@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+
+	<main>
+		<div class="row">
+
+			<% for(var i=0; i<medias.length; i++) {
+					var obj = medias[i];
+					var img = obj.images.standard_resolution;
+
+				%>
+
+				<div class="col-xs-6 col-md-3">
+			    <a href="<%= obj.link %>" target="_blank" class="thumbnail">
+						<img src="<%= img.url %>">
+					</a>
+			  </div>
+			<% } %>
+
+		</div>
+	</main>
+
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+	
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+	
+</head>
+<body class="container">
+
+	<main>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="form-group has-success has-feedback">
+				  <div class="input-group">
+				    <span class="input-group-addon">@</span>
+				    <input type="text" placeholder="Busque uma hashtag e acompanhe em tempo real" class="form-control" id="inputGroupSuccess1" aria-describedby="inputGroupSuccess1Status">
+				  </div>
+				</div>
+			</div>
+		</div>
+		<hr>
+		<div class="row" id="medias">
+		</div>
+	</main>
+
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+	
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		var convert = function(obj) {
+	  	return [
+	  		'<div class="col-xs-6 col-md-3" id="'+ obj.id + '">',
+	  		'<a href="/media/user/'+ obj.user.id + '" class="thumbnail">',
+	  		'<img src="' + obj.images.standard_resolution.url + '">',
+				'</a>',
+		  	'</div>'
+	  	].join("");
+	  };
+
+	  var render = function(item) {
+	  	var html = convert(item);
+  		$("#medias").prepend(html);
+	  }
+
+	  var socket = io();
+	  socket.on('availableMedias', function(result){
+	  	result.medias.forEach(function(item) {
+	  		render(item);
+	  	});
+	  });
+
+	  socket.on('newMedias', function(result) {
+	  	console.log('new media');
+	  	var _lastid = result.last_tag;
+	  	console.log(_lastid);
+
+	  	result.medias.forEach(function(item) {
+	  		render(item);
+	  	});
+
+	  	socket.emit('checkForNewMedias', {last_tag: _lastid});
+	  	
+	  });
+
+	</script>
+</body>
+</html>

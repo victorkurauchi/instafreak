@@ -1,0 +1,17 @@
+{
+  "name": "instafreak",
+  "version": "1.0.0",
+  "description": "if you are a freak instagramer, dont use this",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@victorkurauchi",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.3.3",
+    "express": "^4.13.1",
+    "instagram-node": "^0.5.7",
+    "socket.io": "^1.3.6"
+  }
+}

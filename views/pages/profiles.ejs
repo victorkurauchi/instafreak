@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+
+	<main>
+		<div class="row">
+
+			<% for(var i=0; i<users.length; i++) {
+					var obj = users[i];
+					// var img = obj.images.standard_resolution;
+
+				%>
+				<div class="col-sm-3">
+					<div class="jumbotron">
+						<a href="/media/user/<%= obj.id %>">
+							<img src="<%= obj.profile_picture %>" alt="<%= obj.fullname %>">
+							<p>@<%= obj.username %></p>
+						</a>
+					</div>
+				</div>
+			<% } %>
+
+		</div>
+	</main>
+
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+	
+</body>
+</html>
