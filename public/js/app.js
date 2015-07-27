@@ -7,6 +7,7 @@
   App.insta = {
     TAG: '',
     HOST: 'http://localhost:4000',
+    MEDIAS_PER_PAGE: 20,
 
     init: function() {
       this.onPressEnter();
@@ -63,9 +64,12 @@
       var self = this;
       socket.on('newMedias', function(result) {
         var _lastid = result.last_tag;
-        console.log(_lastid);
+        var total = result.medias.length;
 
-        $('.current-medias').remove();
+        if (total === MEDIAS_PER_PAGE) {
+          $('.current-medias').remove();
+        }
+
         result.medias.forEach(function(item) {
           self.render(item);
         });
@@ -86,15 +90,8 @@
       var self = this;
       $(document).keypress(function(e) {
         if(e.which == 13) {
-          var _query = $("#inputHashtag").val();
-          self.TAG = _query;
-          $.ajax({
-            url: self.HOST + '/hashtag/' + _query,
-            method: "GET",
-            dataType: "json"
-          }).done(function(result) {
-            console.log(resut)
-          });
+          self.TAG = $("#inputHashtag").val();
+          self.getWithHastag();
         }
       });
     },
@@ -103,18 +100,26 @@
       var self = this;
       $("#inputHashtag").keydown(function(e) {
         if(e.keyCode == 9) {
-          var _query = $("#inputHashtag").val();
-          self.TAG = _query;
+          self.TAG = $(this).val();;
+          self.getWithHastag();
+        }
+      });
+    },
 
-          $.ajax({
-            url: self.HOST + '/hashtag/'+_query,
+    getWithHastag: function(callback) {
+      var self = this;
+      if (self.TAG) {
+        $.ajax({
+            url: self.HOST + '/hashtag/' + self.TAG,
             method: "GET",
             dataType: "json"
           }).done(function(result) {
             console.log(resut);
+            if (callback) {
+              callback(null, result);
+            }
           });
-        }
-      });
+      }
     }
 
   };
